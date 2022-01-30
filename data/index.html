@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <title>WiFi Mavlink to UART Settings</title>
+
+        <link href="bootstrap.min.css" rel="stylesheet">
+
+        <meta name="theme-color" content="#7952b3">
+    </head>
+
+    <body>
+        <main>
+            <div class="container-md">
+                <h1>WiFi Settings</h1>
+
+                <form id="wifi">
+                    <div class="mb-3 row">
+                        <label for="wiFiSSID" class="col-sm-2 col-form-label">WiFi SSID</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="wifi-ssid" id="wiFiSSID">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="wiFiSSIDPassword" class="col-sm-2 col-form-label">WiFi Password</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" name="wifi-password" id="wiFiSSIDPassword">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="mb-12">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </div>
+                </form>
+
+                <h1>Settings</h1>
+
+                <form id="settings">
+                    <div class="mb-3 row">
+                        <label for="mavlinkPort" class="col-sm-2 col-form-label">Mavlink port</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="mavlink-port" id="mavlinkPort">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="mb-12">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <script src="jquery-3.6.0.min.js"></script>
+        <script src="bootstrap.min.js"></script>
+
+        <script>
+            function loadSettings() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/settings',
+                    dataType: 'json',
+                    success: function (data) {
+                        $('form#wifi input[name=wifi-ssid]').val(data.wifiSSID);
+                        $('form#wifi input[name=wifi-password]').val(data.wifiPassword);
+                        $('form#settings input[name=mavlink-port]').val(data.mavlinkPort);
+                    },
+                    error: function (xhr, str) {
+                        alert('Errors while loading settings');
+                    }
+                });
+            }
+
+            $(function() {
+                loadSettings();
+
+                $('form#wifi').submit(function(event) {
+                    event.preventDefault();
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api/settings/wifi',
+                        dataType: 'json',
+                        data: {
+                            wifiSSID: $(this).find('input[name=wifi-ssid]').val(),
+                            wifiPassword: $(this).find('input[name=wifi-password]').val()
+                        },
+                        success: function (data) {
+                            alert('Settings successful changed. Please restart converter manually.');
+                        },
+                        error: function (xhr, str) {
+                            alert('Errors while save settings');
+                        }
+                    });
+
+                    return false;
+                });
+
+                $('form#settings').submit(function(event) {
+                    event.preventDefault();
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api/settings',
+                        dataType: 'json',
+                        data: {
+                            mavlinkPort: $(this).find('input[name=mavlink-port]').val()
+                        },
+                        success: function (data) {
+                            alert('Settings successful changed. Please restart converter manually.');
+                        },
+                        error: function (xhr, str) {
+                            alert('Errors while save settings');
+                        }
+                    });
+
+                    return false;
+                });
+            });
+        </script>
+    </body>
+</html>
