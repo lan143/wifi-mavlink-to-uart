@@ -22,7 +22,7 @@ void setup()
     wifiService = new WifiService(settings);
     wifiService->init();
 
-    proxy = new ProxyService(&Serial);
+    proxy = new ProxyService(&Serial, settings);
     proxy->start();
 
     web = new Web(wifiService, settings);
