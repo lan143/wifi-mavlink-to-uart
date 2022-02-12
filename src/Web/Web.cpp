@@ -41,18 +41,6 @@ Web::Web(WifiService* wifiService, Settings* settings)
         request->send(response);
     });
 
-    _server->on("/api/settings", HTTP_POST, [this](AsyncWebServerRequest *request) {
-        if (request->hasParam("mavlinkPort", true)) {
-            AsyncWebParameter* mavlinkPort = request->getParam("mavlinkPort", true);
-
-            _settings->setMavlinkPort(atoi(mavlinkPort->value().c_str()));
-
-            request->send(200, "application/json", "{}");
-        } else {
-            request->send(422, "application/json", "{}");
-        }
-    });
-
     _server->on("/api/settings/wifi", HTTP_POST, [this](AsyncWebServerRequest *request) {
         if (request->hasParam("wifiSSID", true) && request->hasParam("wifiPassword", true)) {
             AsyncWebParameter* wifiSSID = request->getParam("wifiSSID", true);
@@ -63,7 +51,19 @@ Web::Web(WifiService* wifiService, Settings* settings)
 
             request->send(200, "application/json", "{}");
         } else {
-            request->send(422, "application/json", "{}");
+            request->send(422, "application/json", "{\"message\": \"empty wifiSSID or wifiPassword\"}");
+        }
+    });
+
+    _server->on("/api/settings", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        if (request->hasParam("mavlinkPort", true)) {
+            AsyncWebParameter* mavlinkPort = request->getParam("mavlinkPort", true);
+
+            _settings->setMavlinkPort(atoi(mavlinkPort->value().c_str()));
+
+            request->send(200, "application/json", "{}");
+        } else {
+            request->send(422, "application/json", "{\"message\": \"empty mavlinkPort\"}");
         }
     });
 
