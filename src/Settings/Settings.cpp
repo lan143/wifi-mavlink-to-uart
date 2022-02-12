@@ -28,7 +28,7 @@ uint16_t Settings::getMavlinkPort()
     int16_t port;
     port = _eeprom->get(ADDRESS_MAVLINK_PORT, port);
 
-    return port ?: 8888;
+    return port != -1 ? port : 8888;
 }
 
 String Settings::getWifiAPSSID()
@@ -61,15 +61,24 @@ void Settings::saveString(uint16_t from, uint16_t to, String string)
 String Settings::getString(uint16_t from, uint16_t to)
 {
     String string = "";
+    bool isEmptyFlash = true;
 
     for (int16_t i = from; i < to; i++) {
         char byte = this->_eeprom->read(i);
+
+        if (byte != 0xff) {
+            isEmptyFlash = false;
+        }
 
         if (byte != '\0') {
             string += byte;
         } else {
             break;
         }
+    }
+
+    if (isEmptyFlash) {
+        return String();
     }
 
     return string;
