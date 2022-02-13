@@ -42,29 +42,52 @@ Web::Web(WifiService* wifiService, Settings* settings)
     });
 
     _server->on("/api/settings/wifi", HTTP_POST, [this](AsyncWebServerRequest *request) {
-        if (request->hasParam("wifiSSID", true) && request->hasParam("wifiPassword", true)) {
-            AsyncWebParameter* wifiSSID = request->getParam("wifiSSID", true);
-            AsyncWebParameter* wifiPassword = request->getParam("wifiPassword", true);
-
-            _settings->setWifiAPSSID(wifiSSID->value());
-            _settings->setWifiAPPassword(wifiPassword->value());
-
-            request->send(200, "application/json", "{}");
-        } else {
-            request->send(422, "application/json", "{\"message\": \"empty wifiSSID or wifiPassword\"}");
+        if (!request->hasParam("wifiSSID", true) || !request->hasParam("wifiPassword", true)) {
+            request->send(422, "application/json", "{\"message\": \"not present wifiSSID or wifiPassword in request\"}");
+            return;
         }
+
+        AsyncWebParameter* wifiSSID = request->getParam("wifiSSID", true);
+        AsyncWebParameter* wifiPassword = request->getParam("wifiPassword", true);
+
+        if (wifiSSID->value().length() > 31) {
+            request->send(422, "application/json", "{\"message\": \"WiFi SSID lenght more 31 symbols\"}");
+            return;
+        }
+
+        if (wifiPassword->value().length() > 63) {
+            request->send(422, "application/json", "{\"message\": \"WiFi password lenght more 63 symbols\"}");
+            return;
+        }
+
+        _settings->setWifiAPSSID(wifiSSID->value());
+        _settings->setWifiAPPassword(wifiPassword->value());
+
+        request->send(200, "application/json", "{}");
     });
 
     _server->on("/api/settings", HTTP_POST, [this](AsyncWebServerRequest *request) {
-        if (request->hasParam("mavlinkPort", true)) {
-            AsyncWebParameter* mavlinkPort = request->getParam("mavlinkPort", true);
-
-            _settings->setMavlinkPort(atoi(mavlinkPort->value().c_str()));
-
-            request->send(200, "application/json", "{}");
-        } else {
-            request->send(422, "application/json", "{\"message\": \"empty mavlinkPort\"}");
+        if (!request->hasParam("mavlinkPort", true)) {
+            request->send(422, "application/json", "{\"message\": \"not present mavlinkPort in request\"}");
+            return;
         }
+
+        AsyncWebParameter* mavlinkPort = request->getParam("mavlinkPort", true);
+        int mavlinkPortValue = atoi(mavlinkPort->value().c_str());
+
+        if (mavlinkPortValue < 1 || mavlinkPortValue > 65535) {
+            request->send(422, "application/json", "{\"message\": \"MavLINK port should be more 1 and less 65535\"}");
+            return;
+        }
+
+        _settings->setMavlinkPort(mavlinkPortValue);
+
+        request->send(200, "application/json", "{}");
+    });
+
+    _server->on("/api/reboot", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        request->send(200, "application/json", "{}");
+        ESP.restart();
     });
 
     _server->begin();

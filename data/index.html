@@ -92,10 +92,17 @@
                             wifiPassword: $(this).find('input[name=wifi-password]').val()
                         },
                         success: function (data) {
-                            alert('Settings successful changed. Please restart converter manually.');
+                            alert('Settings successful changed. Reboot...');
+
+                            $.ajax({
+                                type: 'POST',
+                                url: '/api/reboot',
+                                dataType: 'json'
+                            });
                         },
                         error: function (xhr, str) {
-                            alert('Errors while save settings');
+                            var data = JSON.parse(xhr.responseText);
+                            alert('Errors while save settings: ' + data.message);
                         }
                     });
 
@@ -113,10 +120,17 @@
                             mavlinkPort: $(this).find('input[name=mavlink-port]').val()
                         },
                         success: function (data) {
-                            alert('Settings successful changed. Please restart converter manually.');
+                            alert('Settings successful changed. Reboot...');
+
+                            $.ajax({
+                                type: 'POST',
+                                url: '/api/reboot',
+                                dataType: 'json'
+                            });
                         },
                         error: function (xhr, str) {
-                            alert('Errors while save settings');
+                            var data = JSON.parse(xhr.responseText);
+                            alert('Errors while save settings: ' + data.message);
                         }
                     });
 
