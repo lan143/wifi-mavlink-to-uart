@@ -17,7 +17,7 @@ void WifiService::init()
     String password = _settings->getWifiAPPassword();
 
     _wifi->mode(WIFI_AP_STA);
-    char ap_ssid[30];
+    char ap_ssid[32];
     #ifdef ESP8266
         sprintf(ap_ssid, AP_SSID, ESP.getChipId());
     #elif defined(ESP32)

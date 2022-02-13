@@ -4,82 +4,71 @@
 Settings::Settings()
 {
     _eeprom = new EEPROMClass();
-    _eeprom->begin(ADDRESS_MAX);
+    _eeprom->begin(sizeof(_settings));
+    loadSettings();
+}
+
+void Settings::loadSettings()
+{
+    _settings = _eeprom->get(0x0, _settings);
+
+    if (_settings.version == 0xff) {
+        initDefaultSettings();
+    }
+}
+
+void Settings::initDefaultSettings()
+{
+    _settings.version = 1;
+    _settings.mavlinkPort = 8888;
+    sprintf(&_settings.apSSID[0], "");
+    sprintf(&_settings.apPassword[0], "");
+    saveSettings();
+}
+
+void Settings::saveSettings()
+{
+    _eeprom->put(0x0, _settings);
+    _eeprom->commit();
 }
 
 void Settings::setMavlinkPort(uint16_t port)
 {
-    _eeprom->put(ADDRESS_MAVLINK_PORT, port);
-    _eeprom->commit();
+    _settings.mavlinkPort = port;
+    saveSettings();
 }
 
 void Settings::setWifiAPSSID(String ssid)
 {
-    saveString(ADDRESS_WIFI_SSID, ADDRESS_WIFI_PASSWORD, ssid);
+    if (ssid.length() > 31) {
+        assert(true);
+    }
+
+    sprintf(&_settings.apSSID[0], "%s", ssid.c_str());
+    saveSettings();
 }
 
 void Settings::setWifiAPPassword(String password)
 {
-    saveString(ADDRESS_WIFI_PASSWORD, ADDRESS_MAX, password);
+    if (password.length() > 63) {
+        assert(true);
+    }
+
+    sprintf(&_settings.apPassword[0], "%s", password.c_str());
+    saveSettings();
 }
 
 uint16_t Settings::getMavlinkPort()
 {
-    int16_t port;
-    port = _eeprom->get(ADDRESS_MAVLINK_PORT, port);
-
-    return port != -1 ? port : 8888;
+    return _settings.mavlinkPort;
 }
 
 String Settings::getWifiAPSSID()
 {
-    return getString(ADDRESS_WIFI_SSID, ADDRESS_WIFI_PASSWORD);
+    return String(_settings.apSSID);
 }
 
 String Settings::getWifiAPPassword()
 {
-    return getString(ADDRESS_WIFI_PASSWORD, ADDRESS_MAX);
-}
-
-void Settings::saveString(uint16_t from, uint16_t to, String string)
-{
-    if (sizeof(string) > (to - from)) {
-        return;
-    }
-
-    uint16_t i;
-    uint16_t j = 0;
-
-    for (i = from; i < from + sizeof(string); i++) {
-        _eeprom->write(i, string[j++]);
-    }
-
-    _eeprom->write(++i, '\0');
-    _eeprom->commit();
-}
-
-String Settings::getString(uint16_t from, uint16_t to)
-{
-    String string = "";
-    bool isEmptyFlash = true;
-
-    for (int16_t i = from; i < to; i++) {
-        char byte = this->_eeprom->read(i);
-
-        if (byte != 0xff) {
-            isEmptyFlash = false;
-        }
-
-        if (byte != '\0') {
-            string += byte;
-        } else {
-            break;
-        }
-    }
-
-    if (isEmptyFlash) {
-        return String();
-    }
-
-    return string;
+    return String(_settings.apPassword);
 }
