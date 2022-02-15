@@ -17,6 +17,13 @@
             <div class="container-md">
                 <h1>WiFi Settings</h1>
 
+                <div class="mb-3 row">
+                    <label class="col-sm-2 col-form-label">WiFi status:</label>
+                    <div class="col-sm-10">
+                        <label id="wifi-status">Loading...</label>
+                    </div>
+                </div>
+
                 <form id="wifi">
                     <div class="mb-3 row">
                         <label for="wiFiSSID" class="col-sm-2 col-form-label">WiFi SSID</label>
@@ -77,8 +84,22 @@
                 });
             }
 
+            function updateWiFiStatus() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/wifi/status',
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#wifi-status').html(data.status);
+                    }
+                });
+            }
+
             $(function() {
                 loadSettings();
+                updateWiFiStatus();
+
+                setInterval(updateWiFiStatus(), 5000);
 
                 $('form#wifi').submit(function(event) {
                     event.preventDefault();

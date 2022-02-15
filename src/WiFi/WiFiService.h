@@ -20,6 +20,7 @@ public:
     void init();
 
     std::list<String> getWifiNetworks();
+    String getWifiStatus();
 
 protected:
     bool startClientMode(String* ssid, String* password);

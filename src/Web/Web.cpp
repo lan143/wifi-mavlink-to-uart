@@ -85,6 +85,16 @@ Web::Web(WifiService* wifiService, Settings* settings)
         request->send(200, "application/json", "{}");
     });
 
+    _server->on("/api/wifi/status", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        AsyncResponseStream *response = request->beginResponseStream("application/json");
+        DynamicJsonDocument json(200);
+        json["status"] = _wifiService->getWifiStatus();
+
+        serializeJson(json, *response);
+
+        request->send(response);
+    });
+
     _server->on("/api/reboot", HTTP_POST, [this](AsyncWebServerRequest *request) {
         request->send(200, "application/json", "{}");
         ESP.restart();

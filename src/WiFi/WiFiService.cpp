@@ -37,6 +37,28 @@ bool WifiService::startClientMode(String* ssid, String* password)
     return true;
 }
 
+String WifiService::getWifiStatus()
+{
+    switch (_wifi->status()) {
+        case WL_IDLE_STATUS:
+            return "Idle";
+        case WL_NO_SSID_AVAIL:
+            return "No SSID available";
+        case WL_CONNECTED:
+            return "Connected";
+        case WL_CONNECT_FAILED:
+            return "Connection failed";
+        case WL_CONNECTION_LOST:
+            return "Connection lost";
+        case WL_WRONG_PASSWORD:
+            return "Wrong password";
+        case WL_DISCONNECTED:
+            return "Disconnected";
+        default:
+            return "Unknow status";
+    }
+}
+
 std::list<String> WifiService::getWifiNetworks()
 {
     //_wifi->mode(WIFI_STA);
