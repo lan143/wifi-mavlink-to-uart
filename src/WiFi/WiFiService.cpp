@@ -30,56 +30,11 @@ void WifiService::init()
     }
 }
 
-void WifiService::update()
-{
-    checkWifiStatus();
-    reconnectToWifiIfNeeded();
-}
-
 bool WifiService::startClientMode(String* ssid, String* password)
 {
     _wifi->begin(ssid->c_str(), password->c_str());
 
-    int numberOfAttempts = 0;
-
-    while (_wifi->status() != WL_CONNECTED) {
-        numberOfAttempts++;
-
-        delay(500);
-
-        if (numberOfAttempts > 20) {
-            break;
-        }
-    }
-
-    if (_wifi->status() == WL_CONNECTED) {
-        _wifiLose = false;
-
-        return true;
-    } else {
-        _wifiLose = true;
-
-        return false;
-    }
-}
-
-void WifiService::checkWifiStatus()
-{
-    if (_wifi->status() != WL_CONNECTED && !_wifiLose) {
-        _wifiLose = true;
-    } else if (_wifi->status() == WL_CONNECTED && _wifiLose) {
-        _wifiLose = false;
-    }
-}
-
-void WifiService::reconnectToWifiIfNeeded()
-{
-    if (_wifiLose) {
-        if ((millis() - _lastReconnect) >= RECONNECT_INTERVAL) {
-            _wifi->reconnect();
-            _lastReconnect = millis();
-        }
-    }
+    return true;
 }
 
 std::list<String> WifiService::getWifiNetworks()

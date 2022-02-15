@@ -30,6 +30,5 @@ void setup()
 
 void loop()
 {
-    wifiService->update();
     proxy->update();
 }

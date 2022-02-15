@@ -19,19 +19,10 @@ public:
 
     void init();
 
-    void update();
-
     std::list<String> getWifiNetworks();
 
 protected:
-    bool _wifiLose;
-
     bool startClientMode(String* ssid, String* password);
-
-    void checkWifiStatus();
-    void reconnectToWifiIfNeeded();
-
-    unsigned long _lastReconnect = 0;
 
     #ifdef ESP8266
         ESP8266WiFiClass *_wifi;
